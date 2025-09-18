@@ -1,8 +1,52 @@
-﻿@{
+﻿@model IEnumerable<Galleria.ViewModels.GalleryItemViewModel>
+@{
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    .gallery-card {
+        margin-bottom: 2rem;
+    }
+    .gallery-card img {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+    }
+    .gallery-card .card-body {
+        text-align: center;
+    }
+</style>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">School Photo & Video Gallery</h1>
+    <p class="lead">A collection of our latest moments and achievements.</p>
+</div>
+
+<hr />
+
+<div class="container">
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4">
+                    <div class="card gallery-card shadow-sm">
+                        <a href="#">
+                            <img src="@item.ThumbnailPath" class="card-img-top" alt="@item.Title">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <p class="text-center text-muted">No media has been uploaded yet. Be the first!</p>
+            </div>
+        }
+    </div>
 </div>

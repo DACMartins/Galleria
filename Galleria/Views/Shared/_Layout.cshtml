@@ -25,6 +25,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @* --- ADD THIS CODE BLOCK --- *@
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Media" asp-action="Upload">Upload</a>
+                            </li>
+                        }
+                        @* --- END OF CODE BLOCK --- *@
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

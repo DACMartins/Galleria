@@ -1,23 +1,36 @@
-using System.Diagnostics;
+using Galleria.Data;
 using Galleria.Models;
+using Galleria.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace Galleria.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var latestMedia = await _context.MediaItems
+                .OrderByDescending(m => m.UploadDate)
+                .Take(12) // Get the 12 most recent items
+                .Select(m => new GalleryItemViewModel
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    ThumbnailPath = m.ThumbnailPath
+                })
+                .ToListAsync();
 
+            return View(latestMedia);
+        }
         public IActionResult Privacy()
         {
             return View();

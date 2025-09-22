@@ -1,0 +1,64 @@
+﻿@model IEnumerable<MediaItem>
+
+@{
+    ViewData["Title"] = "Media Management";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Thumbnail</th>
+            <th>Title</th>
+            <th>Uploader</th>
+            <th>Category</th>
+            <th>Upload Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td><img src="@item.ThumbnailPath" width="100" /></td>
+                <td>@item.Title</td>
+                <td>@item.ApplicationUser.UserName</td>
+                <td>@item.Category.Name</td>
+                <td>@item.UploadDate.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-info btn-sm share-btn" data-id="@item.Id">Share</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shareButtons = document.querySelectorAll('.share-btn');
+            shareButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const mediaId = this.dataset.id;
+
+                    fetch(`/Admin/Media/GenerateShareLink/${mediaId}`, {
+                        method: 'POST',
+                        headers: {
+                            // Required for ASP.NET Core anti-forgery protection
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display the link in a prompt box so the admin can copy it
+                        window.prompt("Copy this shareable link:", data.url);
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
+}

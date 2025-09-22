@@ -54,7 +54,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+// --- ADD THIS NEW ROUTE FOR AREAS ---
+app.MapControllerRoute(
+    name: "AdminArea",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+    );
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",

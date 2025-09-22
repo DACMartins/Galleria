@@ -1,0 +1,36 @@
+﻿@model Galleria.Models.MediaItem
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container mt-4">
+    <h1 class="display-4">@Model.Title</h1>
+    <p class="text-muted">
+        Uploaded by @Model.ApplicationUser.UserName on @Model.UploadDate.ToShortDateString() in Category: @Model.Category.Name
+    </p>
+
+    <hr />
+
+    <div class="text-center my-4">
+        @if (Model.Type == MediaType.Photo)
+        {
+            <img src="@Model.FilePath" class="img-fluid rounded shadow" alt="@Model.Title" />
+        }
+        else if (Model.Type == MediaType.Video)
+        {
+            <video controls class="img-fluid rounded shadow">
+                <source src="@Model.FilePath" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <h4>Description</h4>
+        <p>@Model.Description</p>
+    }
+
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Back to Gallery</a>
+</div>

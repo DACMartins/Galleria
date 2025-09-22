@@ -1,0 +1,86 @@
+﻿@model Galleria.ViewModels.GalleryViewModel
+
+@{
+    ViewData["Title"] = "Gallery";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Browse all the photos and videos from our school events.</p>
+
+<form id="filterForm" asp-action="Index" method="get" class="mb-4">
+    <div class="row align-items-end">
+        <div class="col-md-4">
+            <label asp-for="SelectedCategoryId" class="form-label">Category</label>
+            <select asp-for="SelectedCategoryId" asp-items="@Model.Categories" class="form-select">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SearchKeyword" class="form-label">Keyword</label>
+            <input type="text" asp-for="SearchKeyword" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="SelectedDate" class="form-label">Date</label>
+            <input type="date" asp-for="SelectedDate" class="form-control" />
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <strong>Filter by Type:</strong>
+            <div class="form-check form-check-inline ms-2">
+                <input class="form-check-input" type="radio" asp-for="SelectedType" value="" id="typeAll" checked>
+                <label class="form-check-label" for="typeAll">All</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="SelectedType" value="Photo" id="typePhoto">
+                <label class="form-check-label" for="typePhoto">Photos</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="SelectedType" value="Video" id="typeVideo">
+                <label class="form-check-label" for="typeVideo">Videos</label>
+            </div>
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="row">
+    @if (Model.MediaItems.Any())
+    {
+        @foreach (var item in Model.MediaItems)
+        {
+            <div class="col-md-4">
+                <div class="card gallery-card shadow-sm mb-4">
+                    <a asp-action="Details" asp-route-id="@item.Id">
+                        <img src="@item.ThumbnailPath" class="card-img-top" alt="@item.Title" style="height: 200px; object-fit: cover;">
+                    </a>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@item.Title</h5>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <p class="text-center text-muted">No media found matching your criteria.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterForm = document.getElementById('filterForm');
+            const filterInputs = filterForm.querySelectorAll('input, select');
+
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    filterForm.submit();
+                });
+            });
+        });
+    </script>
+}

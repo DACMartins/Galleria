@@ -1,0 +1,39 @@
+﻿@model Galleria.ViewModels.RoleManagementViewModel
+
+@{
+    ViewData["Title"] = "Manage Roles";
+}
+
+<h1>Manage Roles for @Model.UserName</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="UserName" />
+
+            <div class="card">
+                <div class="card-header">
+                    Select roles to assign
+                </div>
+                <div class="card-body">
+                    @for (int i = 0; i < Model.Roles.Count; i++)
+                    {
+                        <div class="form-check m-1">
+                            <input type="hidden" asp-for="@Model.Roles[i].RoleName" />
+                            <input asp-for="@Model.Roles[i].IsSelected" class="form-check-input" />
+                            <label class="form-check-label" asp-for="@Model.Roles[i].IsSelected">
+                                @Model.Roles[i].RoleName
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -111,8 +111,29 @@ namespace Galleria.Controllers
                 Type = isVideo ? MediaType.Video : MediaType.Photo,
                 UploadDate = DateTime.UtcNow,
                 CategoryId = model.CategoryId,
-                ApplicationUserId = userId // <-- SET THE USER ID HERE
+                ApplicationUserId = _userManager.GetUserId(User),
+                Keywords = new List<Keyword>() // Initialize the Keywords collection
             };
+
+            if (!string.IsNullOrEmpty(model.Tags))
+            {
+                var tagNames = model.Tags.Split(',').Select(t => t.Trim().ToLower()).ToList();
+                foreach (var tagName in tagNames)
+                {
+                    if (string.IsNullOrWhiteSpace(tagName)) continue;
+
+                    // Check if the keyword already exists
+                    var keyword = await _context.Keywords.FirstOrDefaultAsync(k => k.Text == tagName);
+                    if (keyword == null)
+                    {
+                        // If it doesn't exist, create it
+                        keyword = new Keyword { Text = tagName };
+                        _context.Keywords.Add(keyword);
+                    }
+                    // Add the keyword to the media item
+                    mediaItem.Keywords.Add(keyword);
+                }
+            }
 
             // 4. Save the new record to the database
             _context.MediaItems.Add(mediaItem);
@@ -120,5 +141,99 @@ namespace Galleria.Controllers
 
             return RedirectToAction("Index", "Home"); // Or redirect to a gallery page
         }
+
+        // Details view for a specific media item
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var mediaItem = await _context.MediaItems
+                .Include(m => m.Category)        // Include the Category information
+                .Include(m => m.ApplicationUser) // Include the User information
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (mediaItem == null)
+            {
+                return NotFound(); // Return a 404 error if no item is found
+            }
+
+            return View(mediaItem);
+        }
+
+
+        // GET: /Media/ or /Media/Index
+        public async Task<IActionResult> Index(int? SelectedCategoryId, string searchKeyword, string selectedType, DateTime? selectedDate)
+        {
+            IQueryable<MediaItem> mediaQuery = _context.MediaItems.Include(m => m.Category);
+
+            if (SelectedCategoryId.HasValue)
+            {
+                mediaQuery = mediaQuery.Where(m => m.CategoryId == SelectedCategoryId.Value);
+            }
+            // Inside the Index method in MediaController.cs
+
+            if (!string.IsNullOrEmpty(searchKeyword))
+            {
+                // --- UPDATE THIS LINE ---
+                mediaQuery = mediaQuery.Where(m =>
+                    m.Title.Contains(searchKeyword) ||
+                    m.Description.Contains(searchKeyword) ||
+                    m.Keywords.Any(k => k.Text.Contains(searchKeyword)) // Search in keywords
+                );
+            }
+
+            // --- ADD THIS LOGIC ---
+            if (!string.IsNullOrEmpty(selectedType))
+            {
+                if (Enum.TryParse<MediaType>(selectedType, out var mediaType))
+                {
+                    mediaQuery = mediaQuery.Where(m => m.Type == mediaType);
+                }
+            }
+            if (selectedDate.HasValue)
+            {
+                mediaQuery = mediaQuery.Where(m => m.UploadDate.Date == selectedDate.Value.Date);
+            }
+            // --- END OF NEW LOGIC ---
+
+            var filteredMedia = await mediaQuery
+                .OrderByDescending(m => m.UploadDate)
+                .Select(m => new GalleryItemViewModel
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    ThumbnailPath = m.ThumbnailPath
+                }).ToListAsync();
+
+            var viewModel = new GalleryViewModel
+            {
+                MediaItems = filteredMedia,
+                Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", SelectedCategoryId),
+                SelectedCategoryId = SelectedCategoryId,
+                SearchKeyword = searchKeyword,
+                SelectedType = selectedType, // Pass the values back to the view
+                SelectedDate = selectedDate
+            };
+
+            return View(viewModel);
+        }
+        [AllowAnonymous] // Allows access without logging in
+        public async Task<IActionResult> Share(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+
+            var mediaItem = await _context.MediaItems.FirstOrDefaultAsync(m => m.ShareToken == token);
+
+            if (mediaItem == null)
+            {
+                return NotFound();
+            }
+
+            // We'll create a simple view for this
+            return View("Share", mediaItem);
+        }
+
     }
 }

@@ -1,0 +1,21 @@
+﻿@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Delete User";
+}
+
+<h2>Delete User</h2>
+
+<div class="alert alert-danger">
+    <strong>Warning:</strong> You are about to delete this user. This action cannot be undone!
+</div>
+
+<div>
+    <h4>@Model.UserName</h4>
+    <p>Email: @Model.Email</p>
+</div>
+
+<form method="post" asp-area="Admin" asp-controller="Users" asp-action="DeleteConfirmed" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

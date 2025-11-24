@@ -107,8 +107,6 @@ namespace Galleria.Areas.Admin.Controllers
             mediaItem.Description = model.Description;
             mediaItem.CategoryId = model.CategoryId;
 
-            // Update logic for tags can be added here, similar to the Upload method
-
             _context.Update(mediaItem);
             await _context.SaveChangesAsync();
 

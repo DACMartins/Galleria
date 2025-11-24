@@ -2,9 +2,28 @@
 
 @{
     ViewData["Title"] = "User Management";
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
 }
 
 <h1>@ViewData["Title"]</h1>
+
+<div class="mb-3">
+    <a asp-area="Admin"
+       asp-controller="Users"
+       asp-action="Create"
+       class="btn btn-success">
+        + Create User
+    </a>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -23,6 +42,9 @@
                 <td>
                     <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-primary btn-sm">
                         <i class="bi bi-person-rolodex"></i> Manage Roles
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-danger btn-sm ms-2">
+                        <i class="bi bi-trash"></i> Delete
                     </a>
                 </td>
             </tr>

@@ -5,9 +5,6 @@ namespace Galleria.ViewModels
     public class GalleryViewModel
     {
 
-
-
-
         // The list of media items to display on the page
         public List<GalleryItemViewModel> MediaItems { get; set; }
 

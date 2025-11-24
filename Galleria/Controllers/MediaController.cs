@@ -103,15 +103,26 @@ namespace Galleria.Controllers
             }
 
             // ... (Saving the MediaItem to the database remains the same) ...
+            var user = await _userManager.GetUserAsync(User);
             var mediaItem = new MediaItem
             {
                 Title = model.Title,
-                Description = model.Description,
+                Description = string.IsNullOrWhiteSpace(model.Description)
+                    ? string.Empty
+                    : model.Description,
                 FilePath = "/uploads/" + uniqueFileName,
                 ThumbnailPath = webThumbnailPath,
-                // ... etc.
+                CategoryId = model.CategoryId,
+                Type = model.File.ContentType.StartsWith("video")
+            ? MediaType.Video
+            : MediaType.Photo,
+                ApplicationUserId = user.Id,
+                UploadDate = DateTime.UtcNow,
             };
             // ... (Tag processing and saving logic) ...
+
+            _context.MediaItems.Add(mediaItem);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", "Home");
         }
@@ -139,20 +150,46 @@ namespace Galleria.Controllers
         {
             int pageSize = 9;
 
-            IQueryable<MediaItem> mediaQuery = _context.MediaItems.Where(m => !m.IsDeleted);
+            IQueryable<MediaItem> mediaQuery = _context.MediaItems
+                .Where(m => !m.IsDeleted);
 
-            // ... (all your existing filter logic remains the same) ...
-            if (SelectedCategoryId.HasValue) { /* ... */ }
-            if (!string.IsNullOrEmpty(searchKeyword)) { /* ... */ }
-            if (!string.IsNullOrEmpty(selectedType)) { /* ... */ }
-            if (selectedDate.HasValue) { /* ... */ }
+            // 1) Filtro por categoria
+            if (SelectedCategoryId.HasValue)
+            {
+                mediaQuery = mediaQuery.Where(m => m.CategoryId == SelectedCategoryId.Value);
+            }
 
-            // --- NEW MANUAL PAGINATION LOGIC ---
+            // 2) Filtro por palavra-chave (Title / Description)
+            if (!string.IsNullOrWhiteSpace(searchKeyword))
+            {
+                searchKeyword = searchKeyword.Trim();
 
-            // 1. Get the total count of items that match the filter
+                mediaQuery = mediaQuery.Where(m =>
+                    m.Title.Contains(searchKeyword) ||
+                    (m.Description != null && m.Description.Contains(searchKeyword)));
+            }
+
+            // 3) Filtro por tipo (Photo / Video)
+            if (!string.IsNullOrWhiteSpace(selectedType))
+            {
+                if (Enum.TryParse<MediaType>(selectedType, out var mediaType))
+                {
+                    mediaQuery = mediaQuery.Where(m => m.Type == mediaType);
+                }
+            }
+
+            // 4) Filtro por data (só pela parte da data, sem horas)
+            if (selectedDate.HasValue)
+            {
+                var dateOnly = selectedDate.Value.Date;
+
+                mediaQuery = mediaQuery.Where(m => m.UploadDate.Date == dateOnly);
+            }
+
+            // --- PAGINAÇÃO ---
+
             var totalItems = await mediaQuery.CountAsync();
 
-            // 2. Fetch only the items for the current page
             var pagedMediaItems = await mediaQuery
                 .OrderByDescending(m => m.UploadDate)
                 .Skip((page - 1) * pageSize)
@@ -165,7 +202,6 @@ namespace Galleria.Controllers
                 })
                 .ToListAsync();
 
-            // 3. Create the final ViewModel
             var viewModel = new GalleryViewModel
             {
                 MediaItems = pagedMediaItems,
@@ -175,7 +211,11 @@ namespace Galleria.Controllers
                     ItemsPerPage = pageSize,
                     TotalItems = totalItems
                 },
-                Categories = new SelectList(await _context.Categories.Where(c => !c.IsDeleted).ToListAsync(), "Id", "Name", SelectedCategoryId),
+                Categories = new SelectList(
+                    await _context.Categories.Where(c => !c.IsDeleted).ToListAsync(),
+                    "Id",
+                    "Name",
+                    SelectedCategoryId),
                 SelectedCategoryId = SelectedCategoryId,
                 SearchKeyword = searchKeyword,
                 SelectedType = selectedType,
@@ -184,6 +224,7 @@ namespace Galleria.Controllers
 
             return View(viewModel);
         }
+
 
 
         [AllowAnonymous] // Allows access without logging in

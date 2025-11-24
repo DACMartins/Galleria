@@ -69,6 +69,46 @@
         </div>
     }
 </div>
+@* Add this block to the bottom of Views/Media/Index.cshtml *@
+<nav>
+    <ul class="pagination justify-content-center">
+        @if (Model.PagingInfo.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.PagingInfo.CurrentPage - 1)"
+                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                   asp-route-searchKeyword="@Model.SearchKeyword"
+                   asp-route-selectedType="@Model.SelectedType"
+                   asp-route-selectedDate="@Model.SelectedDate">Previous</a>
+            </li>
+        }
+
+        @for (int i = 1; i <= Model.PagingInfo.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PagingInfo.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@i"
+                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                   asp-route-searchKeyword="@Model.SearchKeyword"
+                   asp-route-selectedType="@Model.SelectedType"
+                   asp-route-selectedDate="@Model.SelectedDate">@i</a>
+            </li>
+        }
+
+        @if (Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.PagingInfo.CurrentPage + 1)"
+                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                   asp-route-searchKeyword="@Model.SearchKeyword"
+                   asp-route-selectedType="@Model.SelectedType"
+                   asp-route-selectedDate="@Model.SelectedDate">Next</a>
+            </li>
+        }
+    </ul>
+</nav>
 
 @section Scripts {
     <script>

@@ -37,6 +37,12 @@
             </div>
 
             <div class="form-group mb-3">
+                <label asp-for="OptionalThumbnailFile" class="control-label"></label>
+                <input asp-for="OptionalThumbnailFile" class="form-control" type="file" />
+                <span asp-validation-for="OptionalThumbnailFile" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
                 <label asp-for="File" class="control-label"></label>
                 <input asp-for="File" class="form-control" type="file" />
                 <span asp-validation-for="File" class="text-danger"></span>

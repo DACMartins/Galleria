@@ -21,7 +21,9 @@
                 <td>@user.UserName</td>
                 <td>@user.Email</td>
                 <td>
-                    <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-primary btn-sm">Manage Roles</a>
+                    <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-primary btn-sm">
+                        <i class="bi bi-person-rolodex"></i> Manage Roles
+                    </a>
                 </td>
             </tr>
         }

@@ -25,7 +25,7 @@ namespace Galleria.Areas.Admin.Controllers
         // GET: Admin/Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            return View(await _context.Categories.Where(c => !c.IsDeleted).ToListAsync());
         }
 
         // GET: Admin/Categories/Details/5
@@ -145,10 +145,10 @@ namespace Galleria.Areas.Admin.Controllers
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
+                category.IsDeleted = true; // Set the flag
+                _context.Update(category);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

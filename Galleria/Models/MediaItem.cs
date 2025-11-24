@@ -19,6 +19,8 @@ namespace Galleria.Models
         public ApplicationUser ApplicationUser { get; set; }
 
         public string? ShareToken { get; set; }
+
+        public bool IsDeleted { get; set; }
     }
 
     public enum MediaType { Photo, Video }

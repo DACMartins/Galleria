@@ -24,6 +24,7 @@ namespace Galleria.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var allMedia = await _context.MediaItems
+                .Where(m => !m.IsDeleted)
                 .Include(m => m.ApplicationUser)
                 .Include(m => m.Category)
                 .OrderByDescending(m => m.UploadDate)
@@ -53,23 +54,10 @@ namespace Galleria.Areas.Admin.Controllers
             var mediaItem = await _context.MediaItems.FindAsync(id);
             if (mediaItem != null)
             {
-                // Delete physical files from wwwroot
-                var mainFilePath = Path.Combine(_webHostEnvironment.WebRootPath, mediaItem.FilePath.TrimStart('/'));
-                var thumbFilePath = Path.Combine(_webHostEnvironment.WebRootPath, mediaItem.ThumbnailPath.TrimStart('/'));
-
-                if (System.IO.File.Exists(mainFilePath))
-                {
-                    System.IO.File.Delete(mainFilePath);
-                }
-                if (System.IO.File.Exists(thumbFilePath))
-                {
-                    System.IO.File.Delete(thumbFilePath);
-                }
-
-                _context.MediaItems.Remove(mediaItem);
+                mediaItem.IsDeleted = true; // Set the flag
+                _context.Update(mediaItem);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction(nameof(Index));
         }
         // GET: /Admin/Media/Edit/5

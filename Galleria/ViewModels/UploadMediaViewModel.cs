@@ -21,6 +21,10 @@ namespace Galleria.ViewModels
         [Display(Name = "Tags (comma-separated)")]
         public string? Tags { get; set; }
 
+
+        [Display(Name = "Optional Custom Thumbnail")]
+        public IFormFile? OptionalThumbnailFile { get; set; }
+
         // For populating the dropdown list in the view
         public IEnumerable<SelectListItem>? Categories { get; set; }
 

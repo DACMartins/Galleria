@@ -19,6 +19,7 @@ namespace Galleria.Controllers
         public async Task<IActionResult> Index()
         {
             var latestMedia = await _context.MediaItems
+                .Where(m => !m.IsDeleted) // <-- ADD THIS FILTER
                 .OrderByDescending(m => m.UploadDate)
                 .Take(12) // Get the 12 most recent items
                 .Select(m => new GalleryItemViewModel

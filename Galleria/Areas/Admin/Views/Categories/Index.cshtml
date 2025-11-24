@@ -6,9 +6,9 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Category</a>
-</p>
+<a asp-action="Create" class="btn btn-primary">
+    <i class="bi bi-plus-circle-fill"></i> Create New Category
+</a>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -26,9 +26,15 @@
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Edit">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </a> |
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Details">
+                        <i class="bi bi-info-circle-fill"></i> Details
+                    </a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Delete">
+                        <i class="bi bi-trash3-fill"></i> Delete
+                    </a>
                 </td>
             </tr>
         }

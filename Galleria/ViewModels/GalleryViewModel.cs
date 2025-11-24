@@ -4,8 +4,14 @@ namespace Galleria.ViewModels
 {
     public class GalleryViewModel
     {
+
+
+
+
         // The list of media items to display on the page
         public List<GalleryItemViewModel> MediaItems { get; set; }
+
+        public PagingInfo PagingInfo { get; set; }
 
         // For populating the Category filter dropdown
         public SelectList Categories { get; set; }

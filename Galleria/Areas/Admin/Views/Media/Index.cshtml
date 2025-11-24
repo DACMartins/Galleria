@@ -27,9 +27,9 @@
                 <td>@item.Category.Name</td>
                 <td>@item.UploadDate.ToShortDateString()</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
-                    <button class="btn btn-info btn-sm share-btn" data-id="@item.Id">Share</button>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Delete"><i class="bi bi-trash3-fill"></i></a>
+                    <button class="btn btn-info btn-sm share-btn" data-id="@item.Id" title="Share"><i class="bi bi-share-fill"></i></button>
                 </td>
             </tr>
         }

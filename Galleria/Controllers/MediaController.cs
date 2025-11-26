@@ -47,11 +47,17 @@ namespace Galleria.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Categories = await _context.Categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
+                model.Categories = await _context.Categories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    })
+                    .ToListAsync();
+
                 return View(model);
             }
 
-            // ... (Folder setup and saving the original file remains the same) ...
             string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
             string thumbnailsFolder = Path.Combine(uploadsFolder, "thumbnails");
             Directory.CreateDirectory(uploadsFolder);
@@ -64,15 +70,13 @@ namespace Galleria.Controllers
                 await model.File.CopyToAsync(fileStream);
             }
 
-            // --- UPDATED THUMBNAIL GENERATION LOGIC ---
+            // --- THUMBNAIL GENERATION ---
             string thumbnailFileName = "thumb_" + Path.GetFileNameWithoutExtension(uniqueFileName) + ".jpg";
             string thumbnailPath = Path.Combine(thumbnailsFolder, thumbnailFileName);
             string webThumbnailPath = "/uploads/thumbnails/" + thumbnailFileName;
 
-            // Check if a manual thumbnail was uploaded
             if (model.OptionalThumbnailFile != null && model.OptionalThumbnailFile.Length > 0)
             {
-                // If yes, save the user's provided thumbnail
                 using (var fileStream = new FileStream(thumbnailPath, FileMode.Create))
                 {
                     await model.OptionalThumbnailFile.CopyToAsync(fileStream);
@@ -80,12 +84,12 @@ namespace Galleria.Controllers
             }
             else
             {
-                // If no, use the automatic generation as a fallback
                 bool isVideo = model.File.ContentType.StartsWith("video");
                 if (isVideo)
                 {
                     FFmpeg.SetExecutablesPath("C:\\ffmpeg\\bin");
-                    var conversion = await FFmpeg.Conversions.FromSnippet.Snapshot(filePath, thumbnailPath, TimeSpan.FromSeconds(1));
+                    var conversion = await FFmpeg.Conversions.FromSnippet.Snapshot(
+                        filePath, thumbnailPath, TimeSpan.FromSeconds(1));
                     await conversion.Start();
                 }
                 else
@@ -102,8 +106,8 @@ namespace Galleria.Controllers
                 }
             }
 
-            // ... (Saving the MediaItem to the database remains the same) ...
             var user = await _userManager.GetUserAsync(User);
+
             var mediaItem = new MediaItem
             {
                 Title = model.Title,
@@ -114,12 +118,49 @@ namespace Galleria.Controllers
                 ThumbnailPath = webThumbnailPath,
                 CategoryId = model.CategoryId,
                 Type = model.File.ContentType.StartsWith("video")
-            ? MediaType.Video
-            : MediaType.Photo,
+                    ? MediaType.Video
+                    : MediaType.Photo,
                 ApplicationUserId = user.Id,
                 UploadDate = DateTime.UtcNow,
+                Keywords = new List<Keyword>() // IMPORTANT: initialize this
             };
-            // ... (Tag processing and saving logic) ...
+
+            // -------- TAG PROCESSING --------
+            var tagNames = (model.Tags ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => t.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (tagNames.Any())
+            {
+                // Existing keywords
+                var existingKeywords = await _context.Keywords
+                    .Where(k => tagNames.Contains(k.Text))
+                    .ToListAsync();
+
+                foreach (var keyword in existingKeywords)
+                {
+                    mediaItem.Keywords.Add(keyword);
+                }
+
+                // New tags
+                var existingNames = existingKeywords
+                    .Select(k => k.Text)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var newTagNames = tagNames
+                    .Where(name => !existingNames.Contains(name))
+                    .ToList();
+
+                foreach (var name in newTagNames)
+                {
+                    var keyword = new Keyword { Text = name };
+                    mediaItem.Keywords.Add(keyword); // EF will insert these
+                }
+            }
+            // -------------------------------
 
             _context.MediaItems.Add(mediaItem);
             await _context.SaveChangesAsync();
@@ -151,7 +192,10 @@ namespace Galleria.Controllers
             int pageSize = 9;
 
             IQueryable<MediaItem> mediaQuery = _context.MediaItems
+                .Include(m => m.Keywords)
+                .Include(m => m.Category)
                 .Where(m => !m.IsDeleted);
+
 
             // 1) Filtro por categoria
             if (SelectedCategoryId.HasValue)
@@ -159,14 +203,16 @@ namespace Galleria.Controllers
                 mediaQuery = mediaQuery.Where(m => m.CategoryId == SelectedCategoryId.Value);
             }
 
-            // 2) Filtro por palavra-chave (Title / Description)
+            // 2) Filtro por palavra-chave (Title / Description / Tag)
             if (!string.IsNullOrWhiteSpace(searchKeyword))
             {
-                searchKeyword = searchKeyword.Trim();
+                var keyword = searchKeyword.Trim().ToLower();
 
                 mediaQuery = mediaQuery.Where(m =>
-                    m.Title.Contains(searchKeyword) ||
-                    (m.Description != null && m.Description.Contains(searchKeyword)));
+                    m.Title.ToLower().Contains(keyword) ||
+                    (m.Description != null && m.Description.ToLower().Contains(keyword)) ||
+                    m.Keywords.Any(k => k.Text != null && k.Text.ToLower().Contains(keyword))
+                );
             }
 
             // 3) Filtro por tipo (Photo / Video)

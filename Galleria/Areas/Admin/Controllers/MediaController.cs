@@ -1,4 +1,5 @@
 ﻿using Galleria.Data;
+using Galleria.Models;
 using Galleria.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -106,6 +107,60 @@ namespace Galleria.Areas.Admin.Controllers
             mediaItem.Title = model.Title;
             mediaItem.Description = model.Description;
             mediaItem.CategoryId = model.CategoryId;
+
+            // ---------------- TAG UPDATE LOGIC ----------------
+
+            // 1. Parse & normalize tags from view model
+            var tagNames = (model.Tags ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => t.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            // 2. Remove tags that are no longer present
+            var tagsToRemove = mediaItem.Keywords
+                .Where(k => !tagNames.Contains(k.Text, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var keyword in tagsToRemove)
+            {
+                mediaItem.Keywords.Remove(keyword);
+            }
+
+            // 3. Add / attach tags that should be present
+
+            // Fetch existing Keyword entities for these tag names
+            var existingKeywords = await _context.Keywords
+                .Where(k => tagNames.Contains(k.Text))
+                .ToListAsync();
+
+            // Attach existing keywords that are not yet on this media item
+            foreach (var keyword in existingKeywords)
+            {
+                if (!mediaItem.Keywords.Any(k => k.Id == keyword.Id))
+                {
+                    mediaItem.Keywords.Add(keyword);
+                }
+            }
+
+            // Find which tag names don't exist as Keyword entities yet
+            var existingKeywordNames = existingKeywords
+                .Select(k => k.Text)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var newTagNames = tagNames
+                .Where(name => !existingKeywordNames.Contains(name))
+                .ToList();
+
+            // Create new Keyword entities for brand-new tags
+            foreach (var name in newTagNames)
+            {
+                var keyword = new Keyword { Text = name };
+                mediaItem.Keywords.Add(keyword);
+                // EF will track and insert this via cascade
+            }
+
 
             _context.Update(mediaItem);
             await _context.SaveChangesAsync();

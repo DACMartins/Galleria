@@ -4,111 +4,153 @@
     ViewData["Title"] = "Gallery";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Browse all the photos and videos from our school events.</p>
+<section class="gallery-page">
+    <!-- Cabeçalho da página -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4 gallery-header">
+        <div>
+            <h1 class="page-title mb-1">Gallery</h1>
+            <p class="page-subtitle mb-0">
+                Browse all the photos and videos from our school events.
+            </p>
+        </div>
 
-<form id="filterForm" asp-action="Index" method="get" class="mb-4">
-    <div class="row align-items-end">
-        <div class="col-md-4">
-            <label asp-for="SelectedCategoryId" class="form-label">Category</label>
-            <select asp-for="SelectedCategoryId" asp-items="@Model.Categories" class="form-select">
-                <option value="">All Categories</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label asp-for="SearchKeyword" class="form-label">Keyword</label>
-            <input type="text" asp-for="SearchKeyword" class="form-control" />
-        </div>
-        <div class="col-md-4">
-            <label asp-for="SelectedDate" class="form-label">Date</label>
-            <input type="date" asp-for="SelectedDate" class="form-control" />
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col-md-6">
-            <strong>Filter by Type:</strong>
-            <div class="form-check form-check-inline ms-2">
-                <input class="form-check-input" type="radio" asp-for="SelectedType" value="" id="typeAll">
-                <label class="form-check-label" for="typeAll">All</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" asp-for="SelectedType" value="Photo" id="typePhoto">
-                <label class="form-check-label" for="typePhoto">Photos</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" asp-for="SelectedType" value="Video" id="typeVideo">
-                <label class="form-check-label" for="typeVideo">Videos</label>
-            </div>
-        </div>
-    </div>
-</form>
-
-<hr />
-
-<div class="row">
-    @if (Model.MediaItems.Any())
-    {
-        @foreach (var item in Model.MediaItems)
+        @if (Model.PagingInfo?.TotalItems > 0)
         {
+            <span class="badge gallery-count-badge">
+                @Model.PagingInfo.TotalItems item@(Model.PagingInfo.TotalItems == 1 ? "" : "s")
+            </span>
+        }
+    </div>
+
+    <!-- Filtros -->
+    <form id="filterForm" asp-action="Index" method="get" class="filter-card mb-4">
+        <div class="row g-3 align-items-end">
             <div class="col-md-4">
-                <div class="card gallery-card shadow-sm mb-4">
-                    <a asp-action="Details" asp-route-id="@item.Id">
-                        <img src="@item.ThumbnailPath" class="card-img-top" alt="@item.Title" style="height: 200px; object-fit: cover;">
+                <label asp-for="SelectedCategoryId" class="form-label small text-uppercase text-muted mb-1">Category</label>
+                <select asp-for="SelectedCategoryId" asp-items="@Model.Categories" class="form-select">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="SearchKeyword" class="form-label small text-uppercase text-muted mb-1">Keyword</label>
+                <input type="text" asp-for="SearchKeyword" class="form-control" placeholder="Search by title, description or tag..." />
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="SelectedDate" class="form-label small text-uppercase text-muted mb-1">Date</label>
+                <input type="date" asp-for="SelectedDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-md-8">
+                <span class="form-label small text-uppercase text-muted d-block mb-1">Filter by Type</span>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Filter by type">
+                    <input type="radio" class="btn-check" asp-for="SelectedType" value="" id="typeAll" autocomplete="off">
+                    <label class="btn btn-outline-secondary rounded-pill px-3" for="typeAll">All</label>
+
+                    <input type="radio" class="btn-check" asp-for="SelectedType" value="Photo" id="typePhoto" autocomplete="off">
+                    <label class="btn btn-outline-secondary rounded-pill px-3" for="typePhoto">
+                        <i class="bi bi-image me-1"></i>Photos
+                    </label>
+
+                    <input type="radio" class="btn-check" asp-for="SelectedType" value="Video" id="typeVideo" autocomplete="off">
+                    <label class="btn btn-outline-secondary rounded-pill px-3" for="typeVideo">
+                        <i class="bi bi-camera-video me-1"></i>Videos
+                    </label>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Grid de media -->
+    <div class="row g-4">
+        @if (Model.MediaItems.Any())
+        {
+            @foreach (var item in Model.MediaItems)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="gallery-card-link">
+                        <article class="gallery-card">
+                            <div class="gallery-card-img-wrapper">
+                                <img src="@item.ThumbnailPath"
+                                     alt="@item.Title"
+                                     class="gallery-card-img" />
+                            </div>
+                            <div class="gallery-card-body">
+                                <h5 class="gallery-card-title" title="@item.Title">@item.Title</h5>
+                            </div>
+                        </article>
                     </a>
-                    <div class="card-body text-center">
-                        <h5 class="card-title">@item.Title</h5>
-                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="empty-state text-center py-5">
+                    <i class="bi bi-card-image empty-state-icon mb-3"></i>
+                    <h5 class="mb-2">No media found</h5>
+                    <p class="text-muted mb-0">Try adjusting your filters or search term.</p>
                 </div>
             </div>
         }
-    }
-    else
+    </div>
+
+    <!-- Paginação -->
+    @if (Model.PagingInfo.TotalPages > 1)
     {
-        <div class="col-12">
-            <p class="text-center text-muted">No media found matching your criteria.</p>
-        </div>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center gallery-pagination">
+                @if (Model.PagingInfo.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@(Model.PagingInfo.CurrentPage - 1)"
+                           asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                           asp-route-searchKeyword="@Model.SearchKeyword"
+                           asp-route-selectedType="@Model.SelectedType"
+                           asp-route-selectedDate="@Model.SelectedDate">
+                            Previous
+                        </a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.PagingInfo.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PagingInfo.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                           asp-route-searchKeyword="@Model.SearchKeyword"
+                           asp-route-selectedType="@Model.SelectedType"
+                           asp-route-selectedDate="@Model.SelectedDate">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @if (Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@(Model.PagingInfo.CurrentPage + 1)"
+                           asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
+                           asp-route-searchKeyword="@Model.SearchKeyword"
+                           asp-route-selectedType="@Model.SelectedType"
+                           asp-route-selectedDate="@Model.SelectedDate">
+                            Next
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
     }
-</div>
-@* Add this block to the bottom of Views/Media/Index.cshtml *@
-<nav>
-    <ul class="pagination justify-content-center">
-        @if (Model.PagingInfo.CurrentPage > 1)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index"
-                   asp-route-page="@(Model.PagingInfo.CurrentPage - 1)"
-                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
-                   asp-route-searchKeyword="@Model.SearchKeyword"
-                   asp-route-selectedType="@Model.SelectedType"
-                   asp-route-selectedDate="@Model.SelectedDate">Previous</a>
-            </li>
-        }
-
-        @for (int i = 1; i <= Model.PagingInfo.TotalPages; i++)
-        {
-            <li class="page-item @(i == Model.PagingInfo.CurrentPage ? "active" : "")">
-                <a class="page-link" asp-action="Index"
-                   asp-route-page="@i"
-                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
-                   asp-route-searchKeyword="@Model.SearchKeyword"
-                   asp-route-selectedType="@Model.SelectedType"
-                   asp-route-selectedDate="@Model.SelectedDate">@i</a>
-            </li>
-        }
-
-        @if (Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index"
-                   asp-route-page="@(Model.PagingInfo.CurrentPage + 1)"
-                   asp-route-SelectedCategoryId="@Model.SelectedCategoryId"
-                   asp-route-searchKeyword="@Model.SearchKeyword"
-                   asp-route-selectedType="@Model.SelectedType"
-                   asp-route-selectedDate="@Model.SelectedDate">Next</a>
-            </li>
-        }
-    </ul>
-</nav>
+</section>
 
 @section Scripts {
     <script>

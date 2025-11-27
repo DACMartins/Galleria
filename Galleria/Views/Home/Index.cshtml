@@ -1,52 +1,107 @@
 ﻿@model IEnumerable<Galleria.ViewModels.GalleryItemViewModel>
+
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<style>
-    .gallery-card {
-        margin-bottom: 2rem;
-    }
-    .gallery-card img {
-        height: 200px;
-        object-fit: cover;
-        width: 100%;
-    }
-    .gallery-card .card-body {
-        text-align: center;
-    }
-</style>
+<section class="home-page">
+    <!-- HERO -->
+    <div class="home-hero mb-5">
+        <div class="home-hero-text">
+            <div class="d-inline-flex align-items-center gap-2 mb-3">
+                <span class="badge home-hero-badge">
+                    <i class="bi bi-stars me-1"></i>
+                    School moments, captured.
+                </span>
+            </div>
 
-<div class="text-center">
-    <h1 class="display-4">School Photo & Video Gallery</h1>
-    <p class="lead">A collection of our latest moments and achievements.</p>
-</div>
+            <h1 class="home-hero-title mb-3">
+                School Photo &amp; Video Gallery
+            </h1>
 
-<hr />
+            <p class="home-hero-subtitle mb-4">
+                Explore memories from events, projects and everyday life at school —
+                all in one place, organized and easy to browse.
+            </p>
 
-<div class="container">
-    <div class="row">
+            <div class="home-hero-actions d-flex flex-wrap gap-2">
+                <a asp-controller="Media" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-grid-3x3-gap-fill me-1"></i> View gallery
+                </a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Media" asp-action="Upload" class="btn btn-outline-secondary rounded-pill">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Upload media
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="home-hero-preview d-none d-md-block">
+            <div class="home-hero-card-grid">
+                @foreach (var item in Model.Take(3))
+                {
+                    <div class="home-hero-thumb">
+                        <img src="@item.ThumbnailPath" alt="@item.Title" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ÚLTIMOS UPLOADS -->
+    <div class="home-section-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="home-section-title mb-1">Latest uploads</h2>
+            <p class="home-section-subtitle mb-0">
+                Recently added photos and videos.
+            </p>
+        </div>
+
+        <a asp-controller="Media" asp-action="Index" class="home-section-link d-none d-sm-inline-flex">
+            View full gallery <i class="bi bi-arrow-right-short ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
         @if (Model.Any())
         {
-            @foreach (var item in Model)
+            @foreach (var item in Model.Take(8))
             {
-                <div class="col-md-4">
-                    <div class="card gallery-card shadow-sm">
-                        <a asp-controller="Media" asp-action="Details" asp-route-id="@item.Id">
-                            <img src="@item.ThumbnailPath" class="card-img-top" alt="@item.Title">
-                        </a>
-                        <div class="card-body">
-                            <h5 class="card-title">@item.Title</h5>
-                        </div>
-                    </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <a asp-controller="Media" asp-action="Details" asp-route-id="@item.Id" class="gallery-card-link">
+                        <article class="gallery-card">
+                            <div class="gallery-card-img-wrapper">
+                                <img src="@item.ThumbnailPath"
+                                     alt="@item.Title"
+                                     class="gallery-card-img" />
+                            </div>
+                            <div class="gallery-card-body">
+                                <h5 class="gallery-card-title" title="@item.Title">@item.Title</h5>
+                            </div>
+                        </article>
+                    </a>
                 </div>
             }
         }
         else
         {
             <div class="col-12">
-                <p class="text-center text-muted">No media has been uploaded yet. Be the first!</p>
+                <div class="empty-state text-center py-5">
+                    <i class="bi bi-card-image empty-state-icon mb-3"></i>
+                    <h5 class="mb-2">No media yet</h5>
+                    <p class="text-muted mb-0">
+                        As soon as someone uploads photos or videos, they will appear here.
+                    </p>
+                </div>
             </div>
         }
     </div>
-</div>
+
+    <div class="mt-4 text-center d-sm-none">
+        <a asp-controller="Media" asp-action="Index" class="home-section-link">
+            View full gallery <i class="bi bi-arrow-right-short ms-1"></i>
+        </a>
+    </div>
+</section>

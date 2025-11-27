@@ -193,6 +193,8 @@ namespace Galleria.Controllers
 
             IQueryable<MediaItem> mediaQuery = _context.MediaItems
                 .Include(m => m.Keywords)
+                .Include(m => m.Category)
+                .Include(m => m.ApplicationUser)
                 .Where(m => !m.IsDeleted);
 
 

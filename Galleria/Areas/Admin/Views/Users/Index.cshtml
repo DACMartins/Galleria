@@ -1,53 +1,103 @@
-﻿@model IEnumerable<ApplicationUser>
+﻿@model IEnumerable<Galleria.Models.ApplicationUser>
 
 @{
     ViewData["Title"] = "User Management";
+}
+
+<section class="admin-page">
+    <!-- Alerts -->
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger mb-3">
+            @TempData["Error"]
+        </div>
     }
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">@TempData["Success"]</div>
+        <div class="alert alert-success mb-3">
+            @TempData["Success"]
+        </div>
     }
 
-}
+    <!-- Cabeçalho -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4">
+        <div>
+            <h1 class="admin-title mb-1">
+                <i class="bi bi-people me-2"></i>User management
+            </h1>
+            <p class="admin-subtitle mb-0">
+                Manage accounts, roles and access to the gallery.
+            </p>
+        </div>
 
-<h1>@ViewData["Title"]</h1>
+        <div class="text-md-end d-flex flex-column align-items-md-end gap-2">
+            <span class="badge admin-count-badge">
+                @Model.Count() user@(Model.Count() == 1 ? "" : "s")
+            </span>
 
-<div class="mb-3">
-    <a asp-area="Admin"
-       asp-controller="Users"
-       asp-action="Create"
-       class="btn btn-success">
-        + Create User
-    </a>
-</div>
+            <a asp-area="Admin"
+               asp-controller="Users"
+               asp-action="Create"
+               class="btn btn-primary btn-sm rounded-pill">
+                <i class="bi bi-person-plus-fill me-1"></i> Create user
+            </a>
+        </div>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>
-                    <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-primary btn-sm">
-                        <i class="bi bi-person-rolodex"></i> Manage Roles
-                    </a>
-                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-danger btn-sm ms-2">
-                        <i class="bi bi-trash"></i> Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- Tabela -->
+    <div class="admin-table-card">
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th class="text-end" style="width: 190px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="admin-media-title">@user.UserName</span>
+                            </td>
+                            <td>
+                                <span>@user.Email</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="ManageRoles"
+                                       asp-route-id="@user.Id"
+                                       class="btn btn-outline-info"
+                                       title="Manage roles">
+                                        <i class="bi bi-person-rolodex"></i>
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-id="@user.Id"
+                                       class="btn btn-outline-danger"
+                                       title="Delete user">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="3">
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-person-x mb-2" style="font-size: 1.6rem;"></i>
+                                    <p class="mb-0">No users found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

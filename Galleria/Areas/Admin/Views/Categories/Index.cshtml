@@ -4,39 +4,83 @@
     ViewData["Title"] = "Manage Categories";
 }
 
-<h1>@ViewData["Title"]</h1>
+<section class="admin-page">
+    <!-- Cabeçalho -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4">
+        <div>
+            <h1 class="admin-title mb-1">
+                <i class="bi bi-tags me-2"></i>Manage categories
+            </h1>
+            <p class="admin-subtitle mb-0">
+                Create, rename and manage the categories used in the gallery.
+            </p>
+        </div>
 
-<a asp-action="Create" class="btn btn-primary">
-    <i class="bi bi-plus-circle-fill"></i> Create New Category
-</a>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Edit">
-                        <i class="bi bi-pencil-square"></i> Edit
-                    </a> |
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Details">
-                        <i class="bi bi-info-circle-fill"></i> Details
-                    </a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Delete">
-                        <i class="bi bi-trash3-fill"></i> Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <div class="text-md-end d-flex flex-column align-items-md-end gap-2">
+            <span class="badge admin-count-badge">
+                @Model.Count() categor@(Model.Count() == 1 ? "y" : "ies")
+            </span>
+            <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill">
+                <i class="bi bi-plus-circle me-1"></i> New category
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="admin-table-card">
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th style="width: 140px;" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="admin-media-title">@item.Name</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-outline-secondary"
+                                       title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-outline-info"
+                                       title="Details">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-outline-danger"
+                                       title="Delete">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="2">
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-folder-x mb-2" style="font-size: 1.6rem;"></i>
+                                    <p class="mb-0">No categories created yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -4,56 +4,114 @@
     ViewData["Title"] = "Upload Media";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Upload" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Tags" class="control-label"></label>
-                <input asp-for="Tags" class="form-control" />
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="@Model.Categories">
-                    <option value="">-- Select a Category --</option>
-                </select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="OptionalThumbnailFile" class="control-label"></label>
-                <input asp-for="OptionalThumbnailFile" class="form-control" type="file" />
-                <span asp-validation-for="OptionalThumbnailFile" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="File" class="control-label"></label>
-                <input asp-for="File" class="form-control" type="file" />
-                <span asp-validation-for="File" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Upload" class="btn btn-primary" />
-            </div>
-        </form>
+<section class="upload-page">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4">
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="bi bi-cloud-arrow-up me-2"></i>Upload media
+            </h1>
+            <p class="page-subtitle mb-0">
+                Add new photos or videos to the gallery. Thumbnails are generated automatically, but you can override them.
+            </p>
+        </div>
     </div>
-</div>
+
+    <div class="row g-4">
+        <!-- Formulário principal -->
+        <div class="col-12 col-lg-7">
+            <div class="upload-card">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Title</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="Optional description about this media..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Tags" class="form-label">Tags</label>
+                        <input asp-for="Tags" class="form-control" placeholder="ex: event, school, 9A, football" />
+                        <small class="text-muted d-block mt-1">Separate tags with commas. Example: <code>event, science, 9A</code></small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label">Category</label>
+                        <select asp-for="CategoryId" class="form-select" asp-items="@Model.Categories">
+                            <option value="">-- Select a Category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="mb-3">
+                        <label asp-for="File" class="form-label">Media file</label>
+                        <div class="upload-file-hint mb-1">
+                            <i class="bi bi-file-earmark-arrow-up me-1"></i>
+                            Choose a photo or a video to upload.
+                        </div>
+                        <input asp-for="File" class="form-control" type="file" />
+                        <span asp-validation-for="File" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="OptionalThumbnailFile" class="form-label">
+                            Custom thumbnail <span class="text-muted">(optional)</span>
+                        </label>
+                        <div class="upload-file-hint mb-1">
+                            <i class="bi bi-image me-1"></i>
+                            If not provided, a thumbnail will be generated automatically.
+                        </div>
+                        <input asp-for="OptionalThumbnailFile" class="form-control" type="file" />
+                        <span asp-validation-for="OptionalThumbnailFile" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload me-1"></i>Upload
+                        </button>
+                        <a asp-controller="Media" asp-action="Index" class="btn btn-outline-secondary rounded-pill btn-sm">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Painel lateral com dicas -->
+        <div class="col-12 col-lg-5">
+            <aside class="upload-sidecard">
+                <h5 class="media-section-title mb-3">Tips for better uploads</h5>
+                <ul class="upload-tips list-unstyled mb-0">
+                    <li>
+                        <i class="bi bi-check2-circle me-2 text-success"></i>
+                        Use clear and descriptive titles.
+                    </li>
+                    <li>
+                        <i class="bi bi-check2-circle me-2 text-success"></i>
+                        Add relevant tags so others can find this media easily.
+                    </li>
+                    <li>
+                        <i class="bi bi-check2-circle me-2 text-success"></i>
+                        Prefer landscape images for better thumbnails.
+                    </li>
+                    <li>
+                        <i class="bi bi-check2-circle me-2 text-success"></i>
+                        For videos, choose a custom thumbnail if the auto one isn’t great.
+                    </li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+</section>
 
 @section Scripts {
     @{

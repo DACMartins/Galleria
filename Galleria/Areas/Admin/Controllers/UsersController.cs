@@ -65,12 +65,6 @@ namespace Galleria.Areas.Admin.Controllers
                 return View(model);
             }
 
-            // Se quiseres atribuir logo uma role no futuro:
-            // if (!string.IsNullOrEmpty(model.RoleName))
-            // {
-            //     await _userManager.AddToRoleAsync(user, model.RoleName);
-            // }
-
             return RedirectToAction(nameof(Index));
         }
 
